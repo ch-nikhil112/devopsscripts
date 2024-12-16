@@ -1,0 +1,49 @@
+# Initial template to set up environment in Azure
+
+parameters:
+  azureSubscriptionServiceConnection: ""
+  subscriptionId: ""
+  resourceGroupName: ""
+  azureEnvironment: ""
+  devopsEnvironment: ""
+  dependsOnStage: ""
+  vmName: ""
+ 
+
+
+stages:
+  - stage: "Create_${{ parameters.azureEnvironment }}"
+    displayName: "Create ${{ parameters.azureEnvironment }} Environment"
+    dependsOn: ${{ parameters.dependsOnStage }}
+    variables:
+      - name: subscriptionId
+        value: ${{ parameters.subscriptionId }}
+      - name: resourceGroupName
+        value: ${{ parameters.resourceGroupName }}
+      - name: vmName
+        value: ${{ parameters.vmName }}
+
+
+    jobs:
+      - deployment: EnvironmentSetup
+        displayName: "Create ${{ parameters.azureEnvironment }} Environment Job"
+        pool:
+          vmimage: "windows-latest"
+        environment: ${{ parameters.devopsEnvironment }}
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: git://demo-Az-Scripts/Az-Scripts
+                  path: Az-Scripts
+                 
+                 
+
+
+                - task: AzureCLI@2
+                  displayName: "Azure CLI: Create VM"
+                  inputs:
+                    azureSubscription: ${{ parameters.azureSubscriptionServiceConnection }}
+                    scriptType: 'ps'
+                    scriptPath: "$(Agent.BuildDirectory)/Az-Scripts/AzureCLI/VirtualMachine/Vm.ps1"
+                    arguments: "-subscriptionId $(subscriptionId) -resourceGroupName $(resourceGroupName) -vmName $(vmName) -vnetName $(vnetName) -subnetName $(subnetName) "
