@@ -1,0 +1,28 @@
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - createenv 
+
+resources:
+  repositories:
+    - repository: Az
+      type: git
+      name: DevOps-Scripts
+
+variables:
+  azureSubscriptionServiceConnection: "az-service"
+
+stages:
+  # DEV
+  - template: DevOpsTemplates/envyml@Azure-Scripts_DevOpsTemplates
+    parameters:
+      azureSubscriptionServiceConnection: $(azureSubscriptionServiceConnection)
+      subscriptionId:081f341e-de8f-4bcd-8946-3fa44b5188e0
+      resourceGroupName:learn-85eb9b41-4772-4cb5-817e-87c5f6d47354
+      azureEnvironment:Dev
+      devopsEnvironment:Dev_inf
+      dependsOnStage: []
+      vmName:demo-vm 
